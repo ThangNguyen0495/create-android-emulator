@@ -3,20 +3,33 @@ description: 'Sets up an Android SDK, creates an emulator, and starts it.'
 runs:
   using: 'composite'
   steps:
-    - name: Enable KVM group perms
+    - name: Enable KVM group permission for Linux runners
+      if: runner.os == 'Linux'
       run: |
         echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
         sudo udevadm control --reload-rules
         sudo udevadm trigger --name-match=kvm
       shell: bash
 
-    - name: Install Android SDK
+    - name: Install Android SDK on Linux
+      if: runner.os == 'Linux'
       run: |
-        sudo apt-get update  > /dev/null 2>&1
-        sudo apt-get install -y wget unzip  > /dev/null 2>&1
+        sudo apt-get update > /dev/null 2>&1
+        sudo apt-get install -y wget unzip > /dev/null 2>&1
         wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip  > /dev/null 2>&1
         mkdir -p $HOME/android-sdk/cmdline-tools  > /dev/null 2>&1
         unzip commandlinetools-linux-8512546_latest.zip -d $HOME/android-sdk/cmdline-tools  > /dev/null 2>&1
+        mv $HOME/android-sdk/cmdline-tools/cmdline-tools $HOME/android-sdk/cmdline-tools/tools  > /dev/null 2>&1
+      shell: bash
+
+    - name: Install Android SDK on macOS
+      if: runner.os == 'macOS'
+      run: |
+        brew update  > /dev/null 2>&1
+        brew install wget unzip  > /dev/null 2>&1
+        wget https://dl.google.com/android/repository/commandlinetools-mac-8512546_latest.zip  > /dev/null 2>&1
+        mkdir -p $HOME/android-sdk/cmdline-tools   > /dev/null 2>&1
+        unzip commandlinetools-mac-8512546_latest.zip -d $HOME/android-sdk/cmdline-tools   > /dev/null 2>&1
         mv $HOME/android-sdk/cmdline-tools/cmdline-tools $HOME/android-sdk/cmdline-tools/tools  > /dev/null 2>&1
       shell: bash
 
@@ -29,17 +42,11 @@ runs:
         echo "$ANDROID_HOME/platform-tools" >> $GITHUB_PATH
       shell: bash
 
-    - name: Check Ubuntu environment variables
-      run: |
-        echo $ANDROID_HOME
-        echo $PATH
-      shell: bash
-
     - name: Accept Android SDK licenses interactively
       run: yes | $HOME/android-sdk/cmdline-tools/tools/bin/sdkmanager --licenses  > /dev/null 2>&1 || true
       shell: bash
 
-    - name: Install SDK package
+    - name: Install SDK images
       run: |
         $HOME/android-sdk/cmdline-tools/tools/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.0" "system-images;android-33;google_apis;x86_64" "emulator"  > /dev/null 2>&1
       shell: bash
