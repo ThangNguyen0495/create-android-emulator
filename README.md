@@ -6,7 +6,7 @@ This project provides a script to automate the creation and startup of an Androi
 
 **Features**
 
-- **Automated Setup:** Quickly create and start an Android Emulator with API 33.
+- **Automated Setup:** Quickly create and start an Android Emulator with API 35.
 - **Platform Support:** Compatible with Linux and macOS-13 runners.
 - **Future-Proof:** Additional API levels and platform support planned for future releases.
 
@@ -56,6 +56,8 @@ jobs:
       
     - name: Create and start emulator
       uses: ThangNguyen0495/create-android-emulator@v1.0.0
+      with:
+        api-level: '35'
       
     - name: Run tests
       run: mvn test
