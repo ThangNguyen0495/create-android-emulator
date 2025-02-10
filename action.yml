@@ -84,7 +84,7 @@ runs:
         boot_completed=""
         while [ "$boot_completed" != "1" ]; do
           sleep 5
-          boot_completed=$(adb shell getprop sys.boot_completed 2>/dev/null)
+          boot_completed=$($ANDROID_HOME/platform-tools/adb shell getprop sys.boot_completed 2>/dev/null)
           echo "Waiting for emulator to boot..."
         done
         echo "Emulator is ready!"
