@@ -77,7 +77,17 @@ runs:
       run: |
           nohup $HOME/android-sdk/emulator/emulator -avd emu -no-metrics -no-snapshot-load -no-snapshot-save -no-boot-anim -wipe-data -no-window -gpu swiftshader_indirect -delay-adb &
           $ANDROID_HOME/platform-tools/adb wait-for-device
-  
+      shell: bash
+
+    - name: Wait for Emulator to Boot
+      run: |
+        boot_completed=""
+        while [ "$boot_completed" != "1" ]; do
+          sleep 5
+          boot_completed=$(adb shell getprop sys.boot_completed 2>/dev/null)
+          echo "Waiting for emulator to boot..."
+        done
+        echo "Emulator is ready!"
       shell: bash
 
     - name: Check list devices
