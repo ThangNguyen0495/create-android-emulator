@@ -78,7 +78,7 @@ runs:
           nohup $HOME/android-sdk/emulator/emulator -avd emu -no-snapshot-load -no-snapshot-save -no-boot-anim -wipe-data -no-window  -gpu swiftshader_indirect  -delay-adb &
           $ANDROID_HOME/platform-tools/adb wait-for-device
           
-          max_retries=30
+          max_retries=120
           attempt=0
           
           while [ "$($ANDROID_HOME/platform-tools/adb shell getprop sys.boot_completed | tr -d '\r')" != "1" ] && [ $attempt -lt $max_retries ]; do
