@@ -75,7 +75,7 @@ runs:
 
     - name: Start Android emulator
       run: |
-          nohup $HOME/android-sdk/emulator/emulator -avd emu -no-metrics -no-snapshot-save -no-boot-anim -wipe-data -no-window -gpu off &
+          $HOME/android-sdk/emulator/emulator -avd emu -no-snapshot-load -no-snapshot-save -no-boot-anim -wipe-data -no-window -gpu off  -delay-adb swiftshader_indirect &
           $ANDROID_HOME/platform-tools/adb wait-for-device
           
           max_retries=30
