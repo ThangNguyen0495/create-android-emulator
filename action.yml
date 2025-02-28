@@ -54,29 +54,17 @@ runs:
 
     - name: Install SDK images
       run: |
-        $HOME/android-sdk/cmdline-tools/tools/bin/sdkmanager \
-          "platform-tools" \
-          "platforms;android-${{ inputs.api-level }}" \
-          "build-tools;${{ inputs.api-level }}.0.0" \
-          "system-images;android-${{ inputs.api-level }};google_apis;x86_64" \
-          "emulator" > /dev/null 2>&1
+        $HOME/android-sdk/cmdline-tools/tools/bin/sdkmanager --install 'system-images;android-${{ inputs.api-level }};google_apis;x86_64' --channel=0 > /dev/null
       shell: bash
 
     - name: Create emulator
       run: |
-        echo "no" | $HOME/android-sdk/cmdline-tools/tools/bin/avdmanager create avd -n emu -k "system-images;android-${{ inputs.api-level }};google_apis;x86_64" --device "pixel" > /dev/null 2>&1
-      shell: bash
-
-    - name: Restart the ADB server before starting the test
-      run: |
-            $ANDROID_HOME/platform-tools/adb kill-server
-            $ANDROID_HOME/platform-tools/adb start-server
+        echo no | avdmanager create avd --force -n emu --abi 'google_apis/x86_64' --package 'system-images;android-${{ inputs.api-level }};google_apis;x86_64' --device 'pixel'
       shell: bash
 
     - name: Start Android emulator
       run: |
-          nohup $HOME/android-sdk/emulator/emulator -avd emu -no-metrics -no-snapshot-load -no-snapshot-save -no-window -no-boot-anim -wipe-data -gpu swiftshader_indirect -delay-adb &
-          $ANDROID_HOME/platform-tools/adb wait-for-device
+          nohup $HOME/android-sdk/emulator/emulator -port 5554 -avd emu -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim &
       shell: bash
 
     - name: Wait for Emulator to Boot
@@ -84,10 +72,14 @@ runs:
         boot_completed=""
         while [ "$boot_completed" != "1" ]; do
           sleep 5
-          boot_completed=$($ANDROID_HOME/platform-tools/adb shell getprop sys.boot_completed 2>/dev/null)
+          boot_completed=$($ANDROID_HOME/platform-tools/adb -s emulator-5554 shell getprop sys.boot_completed >/dev/null)
           echo "Waiting for emulator to boot..."
         done
         echo "Emulator is ready!"
+        $ANDROID_HOME/platform-tools/adb -s emulator-5554 shell input keyevent 82
+        $ANDROID_HOME/platform-tools/adb -s emulator-5554 shell settings put global window_animation_scale 0.0
+        $ANDROID_HOME/platform-tools/adb -s emulator-5554 shell settings put global transition_animation_scale 0.0
+        $ANDROID_HOME/platform-tools/adb -s emulator-5554 shell settings put global animator_duration_scale 0.0
       shell: bash
 
     - name: Check list devices
