@@ -89,12 +89,19 @@ runs:
         $ANDROID_HOME/platform-tools/adb -s emulator-5554 shell input keyevent 82
       shell: bash
     
-    - name: Disable Animations
+    - name: Configure Emulator Settings
       run: |
-        echo "Disabling animations..."
-        $ANDROID_HOME/platform-tools/adb -s emulator-5554 shell settings put global window_animation_scale 0.0
-        $ANDROID_HOME/platform-tools/adb -s emulator-5554 shell settings put global transition_animation_scale 0.0
-        $ANDROID_HOME/platform-tools/adb -s emulator-5554 shell settings put global animator_duration_scale 0.0
+        echo "Disabling Hidden API Policy Restrictions..."
+        adb -P 5037 -s emulator-5554 shell settings delete global hidden_api_policy_pre_p_apps
+        adb -P 5037 -s emulator-5554 shell settings delete global hidden_api_policy_p_apps
+        adb -P 5037 -s emulator-5554 shell settings delete global hidden_api_policy
+    
+        echo "Disabling Animations..."
+        adb -P 5037 -s emulator-5554 shell settings put global window_animation_scale 0
+        adb -P 5037 -s emulator-5554 shell settings put global transition_animation_scale 0
+        adb -P 5037 -s emulator-5554 shell settings put global animator_duration_scale 0
+    
+        echo "Configuration Completed."
       shell: bash
 
     - name: Check list devices
