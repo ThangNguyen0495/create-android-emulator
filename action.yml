@@ -96,29 +96,15 @@ runs:
           nohup $HOME/android-sdk/emulator/emulator -port 5554 -avd emu -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim &
       shell: bash
 
-    - name: Wait for Emulator to Boot
+     - name: Wait for Emulator to Boot
       run: |
-        bootanim=""
-        failcounter=0
-        timeout_in_sec=500
-        until [[ "$bootanim" =~ "stopped" ]]; do
-          bootanim=$(adb -e shell getprop init.svc.bootanim 2>/dev/null || true)
-          echo "Boot animation status: $bootanim"
-          if [[ "$bootanim" =~ "not found"
-            || "$bootanim" =~ "device not found"
-            || "$bootanim" =~ "no emulators found"
-            || "$bootanim" =~ "device offline"
-            || "$bootanim" =~ "running" ]]; then
-            ((failcounter+=5))
-            echo "$bootanim"
-            if [[ $failcounter -gt $timeout_in_sec ]]; then
-              echo "Timeout ($timeout_in_sec seconds) reached; failed to start emulator"
-              exit 1
-            fi
-          fi
+        boot_completed=""
+        while [ "$boot_completed" != "1" ]; do
           sleep 5
+          boot_completed=$($ANDROID_HOME/platform-tools/adb -s emulator-5554 shell getprop sys.boot_completed || true)
+          echo "Waiting for emulator to boot..."
         done
-        echo "Emulator is ready!"
+        echo "Emulator has booted!"
       shell: bash
     
     - name: Unlock Emulator
