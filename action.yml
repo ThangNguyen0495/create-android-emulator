@@ -124,7 +124,7 @@ runs:
     - name: Unlock Emulator
       run: |
         echo "Unlocking emulator..."
-        $ANDROID_HOME/platform-tools/adb -s emulator-5554 shell input keyevent 82
+        $ANDROID_HOME/platform-tools/adb -s emulator-5554 shell input keyevent 82 || true
       shell: bash
     
     - name: Configure Emulator Settings
