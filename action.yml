@@ -69,34 +69,34 @@ runs:
 
     - name: Config emulator
       run: |
-          AVD_PATH="$HOME/.android/avd/emu.avd/config.ini"
-          
-          # Ensure AVD exists before modifying
-          if [ -f "$AVD_PATH" ]; then
-              echo "Modifying emulator config..."
-              echo "hw.cpu.ncore=4" >> "$AVD_PATH"
-              echo "hw.ramSize=4096" >> "$AVD_PATH"
-              echo "hw.heapSize=512" >> "$AVD_PATH"
-              echo "disk.dataPartition.size=6G" >> "$AVD_PATH"
-              echo "hw.keyboard=yes" >> "$AVD_PATH"
-          else
-              echo "AVD not found! Skipping configuration."
-              exit 1
-          fi
-    
-          # Disable hardware acceleration on Linux (if needed)
-          if [[ "$RUNNER_OS" == "Linux" ]]; then
-              echo "Disabling Linux hardware acceleration"
-              echo "ANDROID_EMULATOR_OPTIONS=-accel off" >> $GITHUB_ENV
-          fi
+        AVD_PATH="$HOME/.android/avd/emu.avd/config.ini"
+        
+        # Ensure AVD exists before modifying
+        if [ -f "$AVD_PATH" ]; then
+            echo "Modifying emulator config..."
+            echo "hw.cpu.ncore=4" >> "$AVD_PATH"
+            echo "hw.ramSize=4096" >> "$AVD_PATH"
+            echo "hw.heapSize=512" >> "$AVD_PATH"
+            echo "disk.dataPartition.size=6G" >> "$AVD_PATH"
+            echo "hw.keyboard=yes" >> "$AVD_PATH"
+        else
+            echo "AVD not found! Skipping configuration."
+            exit 1
+        fi
+        
+        # Disable hardware acceleration on Linux (if needed)
+        if [[ "$RUNNER_OS" == "Linux" ]]; then
+            echo "Disabling Linux hardware acceleration"
+            echo "ANDROID_EMULATOR_OPTIONS=-accel off" >> $GITHUB_ENV
+        fi
       shell: bash
 
     - name: Start Android emulator
       run: |
-          nohup $HOME/android-sdk/emulator/emulator -port 5554 -avd emu -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim &
+        nohup $HOME/android-sdk/emulator/emulator -port 5554 -avd emu -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim &
       shell: bash
 
-     - name: Wait for Emulator to Boot
+    - name: Wait for Emulator to Boot
       run: |
         boot_completed=""
         while [ "$boot_completed" != "1" ]; do
@@ -106,29 +106,29 @@ runs:
         done
         echo "Emulator has booted!"
       shell: bash
-    
+
     - name: Unlock Emulator
       run: |
         echo "Unlocking emulator..."
         $ANDROID_HOME/platform-tools/adb -s emulator-5554 shell input keyevent 82 || true
       shell: bash
-    
+
     - name: Configure Emulator Settings
       run: |
         echo "Disabling Hidden API Policy Restrictions..."
         adb -P 5037 -s emulator-5554 shell settings delete global hidden_api_policy_pre_p_apps
         adb -P 5037 -s emulator-5554 shell settings delete global hidden_api_policy_p_apps
         adb -P 5037 -s emulator-5554 shell settings delete global hidden_api_policy
-    
+        
         echo "Disabling Animations..."
         adb -P 5037 -s emulator-5554 shell settings put global window_animation_scale 0
         adb -P 5037 -s emulator-5554 shell settings put global transition_animation_scale 0
         adb -P 5037 -s emulator-5554 shell settings put global animator_duration_scale 0
-    
+        
         echo "Configuration Completed."
       shell: bash
 
     - name: Check list devices
       run: |
-          $ANDROID_HOME/platform-tools/adb devices
+        $ANDROID_HOME/platform-tools/adb devices
       shell: bash
